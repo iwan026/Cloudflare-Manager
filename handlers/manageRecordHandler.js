@@ -2,7 +2,7 @@ const axios = require('axios');
 const { CloudflareAccount } = require('../database/database');
 const { mainMenu } = require('./mainMenu');
 
-const RECORDS_PER_PAGE = 20; 
+const RECORDS_PER_PAGE = 20;
 
 const manageRecordHandler = async (bot, chatId, messageId, accountId, page = 1) => {
 try {
@@ -34,18 +34,23 @@ page: page
 const { result: records, result_info } = response.data;
 const { page: currentPage, total_pages: totalPages } = result_info;
 
-// 3. Format pesan
-let message = `📋 *DNS Records untuk ${account.domainName}*\n`;
-message += `Halaman ${currentPage}/${totalPages}\n\n`;
+// 3. Format pesan dengan blok kode (```)
+let message = `📋 *DNS Records untuk ${account.domainName}*\n` +
+`Halaman ${currentPage}/${totalPages}\n` +
+"```\n";
 
 records.forEach(record => {
-message += `🔹 *${record.name}* (${record.type})\n`;
-message += `📌 Content: \`${record.content}\`\n`;
-message += `⏱️ TTL: ${record.ttl}\n`;
-message += `🛡️ Proxied: ${record.proxied ? '✅' : '❌'}\n\n`;
+message += `𝗜𝗗: ${record.id}\n` +
+`𝗡𝗮𝗺𝗲: ${record.name}\n` +
+`𝗧𝗶𝗽𝗲: ${record.type}\n` +
+`𝗖𝗼𝗻𝘁𝗲𝗻𝘁: ${record.content}\n` +
+`𝗧𝗧𝗟: ${record.ttl}\n` +
+`𝗣𝗿𝗼𝘅𝗶𝗲𝗱: ${record.proxied ? '✅' : '❌'}\n\n`;
 });
 
-// 4. Tombol paginasi
+message += "```";
+
+// 4. Tombol paginasi (tetap sama)
 const paginationButtons = [];
 if (currentPage > 1) {
 paginationButtons.push({
@@ -72,7 +77,7 @@ const buttons = [
 ]
 ];
 
-// 6. Kirim/update pesan
+// 6. Kirim pesan
 await bot.editMessageText(message, {
 chat_id: chatId,
 message_id: messageId,
@@ -84,7 +89,8 @@ reply_markup: { inline_keyboard: buttons }
 console.error('Error:', error.response?.data || error.message);
 await bot.sendMessage(
 chatId,
-`❌ Gagal mengambil records: ${error.response?.data?.errors?.[0]?.message || 'Server error'}`
+`❌ Gagal mengambil records: ${error.response?.data?.errors?.[0]?.message || 'Server error'}`,
+{ parse_mode: 'Markdown' }
 );
 mainMenu(bot, chatId, messageId);
 }

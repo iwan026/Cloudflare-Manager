@@ -56,10 +56,7 @@ break;
 }
 } catch (error) {
 console.error('Handler error:', error);
-await bot.sendMessage(
-chatId, 
-`❌ Error: ${error.message || 'Gagal memproses data'}`
-);
+await bot.sendMessage(chatId, '❌ Gagal memproses data');
 }
 };
 
