@@ -15,7 +15,9 @@ switch (state.step) {
 case 2:
 state.name = text;
 state.step = 3;
-await bot.sendMessage(chatId, '*Masukkan content/tujuan:*', {parse_mode:'Markdown'});
+await bot.sendMessage(chatId, '*Masukkan content/tujuan:*', {
+parse_mode: 'Markdown'
+});
 break;
 
 case 3:
@@ -40,34 +42,28 @@ await bot.sendMessage(chatId, '❌ Gagal memproses data');
 
 const processAddRecord = async (bot, chatId, state, id) => {
 try {
-const account = await CloudflareAccount.findOne({ where: { id: id } });
+const account = await CloudflareAccount.findOne({ where: { id } });
 if (!account) {
 await bot.sendMessage(chatId, '❌ Akun Cloudflare tidak ditemukan');
 return;
 }
 
 // 1. Tambahkan domain ke worker
-const workerData = {
+await bot.sendMessage(chatId, '⏳ Menambahkan domain ke worker...');
+const workerResponse = await axios.put(
+`https://api.cloudflare.com/client/v4/accounts/${account.accountId}/workers/domains`, 
+{
 environment: 'production',
 hostname: state.name,
 service: account.workerName,
-zone_id: account.zoneId,
-};
-
-await bot.sendMessage(chatId, '⏳ Menambahkan domain ke worker...');
-const addResponse = await axios.put(
-`https://api.cloudflare.com/client/v4/accounts/${account.accountId}/workers/domains`, 
-workerData,
+zone_id: account.zoneId
+},
 {
-headers: {
-'Content-Type': 'application/json',
-'X-Auth-Email': account.email,
-'X-Auth-Key': account.apiKey,
-}
+headers: createHeaders(account)
 }
 );
 
-const domainId = addResponse.data.result?.id;
+const domainId = workerResponse.data.result?.id;
 if (!domainId) throw new Error('Gagal mendapatkan ID domain');
 
 // 2. Tunggu 10 detik
@@ -78,49 +74,52 @@ await sleep(10);
 await bot.sendMessage(chatId, '⏳ Menghapus domain dari worker...');
 await axios.delete(
 `https://api.cloudflare.com/client/v4/accounts/${account.accountId}/workers/domains/${domainId}`,
-{
-headers: {
-'X-Auth-Email': account.email,
-'X-Auth-Key': account.apiKey,
-}
-}
+{ headers: createHeaders(account) }
 );
 
 // 4. Tambahkan DNS record
-const dnsRecord = {
+await bot.sendMessage(chatId, '⏳ Menambahkan DNS record...');
+await axios.post(
+`https://api.cloudflare.com/client/v4/zones/${account.zoneId}/dns_records`,
+createDNSRecord(state),
+{ headers: createHeaders(account) }
+);
+
+await bot.sendMessage(chatId, createSuccessMessage(state));
+
+} catch (error) {
+console.error('Process error:', error);
+await handleError(bot, chatId, error);
+}
+};
+
+// Fungsi pembantu untuk optimasi
+const createHeaders = (account) => ({
+'Content-Type': 'application/json',
+'X-Auth-Email': account.email,
+'X-Auth-Key': account.apiKey
+});
+
+const createDNSRecord = (state) => ({
 type: state.tipe,
 name: state.name,
 content: state.content,
 proxied: state.proxy === 'true',
 ttl: 1,
 comment: 'Added by Xentrovt Bot'
-};
+});
 
-await bot.sendMessage(chatId, '⏳ Menambahkan DNS record...');
-const dnsResponse = await axios.post(
-`https://api.cloudflare.com/client/v4/zones/${account.zoneId}/dns_records`,
-dnsRecord,
-{
-headers: {
-'Content-Type': 'application/json',
-'X-Auth-Email': account.email,
-'X-Auth-Key': account.apiKey,
-}
-}
-);
-
-await bot.sendMessage(chatId, 
+const createSuccessMessage = (state) => (
 `✅ Record DNS berhasil ditambahkan!\n\n` +
 `• Tipe: ${state.tipe}\n` +
 `• Domain: ${state.name}\n` +
 `• Content: ${state.content}\n` +
-`• Proxy: ${state.proxy === 'true' ? 'Aktif' : 'Nonaktif'}`);
+`• Proxy: ${state.proxy === 'true' ? 'Aktif' : 'Nonaktif'}`
+);
 
-} catch (error) {
-console.error('Process error:', error);
-await bot.sendMessage(chatId, 
-`❌ Gagal memproses:\n${error.response?.data?.errors?.[0]?.message || error.message}`);
-}
+const handleError = async (bot, chatId, error) => {
+const errorMessage = error.response?.data?.errors?.[0]?.message || error.message;
+await bot.sendMessage(chatId, `❌ Gagal memproses:\n${errorMessage}`);
 };
 
 module.exports = { addRecordHandler, processAddRecord };

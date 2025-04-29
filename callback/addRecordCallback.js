@@ -61,8 +61,7 @@ await bot.editMessageText(
 { chat_id: chatId, message_id: msgId }
 );
 
-// Lanjutkan proses add record
-await addRecordHandler.processAddRecord(bot, chatId, userState[chatId], userState[chatId].id);
+await processAddRecord(bot, chatId, userState[chatId], userState[chatId].id);
 clearTimeout(userState[chatId].timeout);
 delete userState[chatId];
 }
