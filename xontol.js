@@ -4,7 +4,9 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const { User } = require('./database/database');
 const { mainMenuCommand } = require('./handlers/mainMenu');
+const mainMenuCallback = require('./callback/mainMenuCallback');
 const addCloudflareAccountCallback = require('./callback/addCloudflareAccountCallback');
+const manageRecordCallback = require('./callback/manageRecordCallback');
 
 const app = express();
 app.use(bodyParser.json());
@@ -65,7 +67,9 @@ console.log('Error sending message: ', error);
 });
 
 mainMenuCommand(bot);
+mainMenuCallback(bot);
 addCloudflareAccountCallback(bot);
+manageRecordCallback(bot);
 
 app.listen(port, () => {
 console.log(`Bot is running on port ${port} with webhook ${webhookUrl}`);

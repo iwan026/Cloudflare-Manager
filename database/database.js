@@ -49,10 +49,6 @@ allowNull: false,
 accountId: {
 type: DataTypes.STRING,
 allowNull: false,
-},
-workerName: {
-type: DataTypes.STRING,
-allowNull: true,
 }
 });
 
