@@ -1,11 +1,17 @@
 const axios = require('axios');
+const workerContent = require('../utils/workerContent');
 const { User, CloudflareAccount } = require('../database/database');
 const { mainMenu } = require('../handlers/mainMenu');
 
 const userState = {};
 
-const addCloudflareAccount = (bot) => {
-bot.on('callback_query' , async (callbackQuery) => {
+const generateRandomWorkerName = () => {
+const randomNum = Math.floor(1000 + Math.random() * 9000);
+return `xentrovt-${randomNum}`;
+};
+
+const addCloudflareAccountCallback = (bot) => {
+bot.on('callback_query', async (callbackQuery) => {
 const { data, message } = callbackQuery;
 const chatId = message.chat.id;
 const messageId = message.message_id;
@@ -14,7 +20,7 @@ if (data === 'add_cloudflare') {
 try {
 userState[chatId] = {
 step: 1,
-timeout: setTimeout(async() => {
+timeout: setTimeout(async () => {
 delete userState[chatId];
 try {
 await bot.sendMessage(chatId, 'Proses tambah akun cloudflare dibatalkan');
@@ -22,12 +28,12 @@ await mainMenu(bot, chatId);
 } catch (error) {
 console.log(`Gagal mengirim pesan timeout ke ${chatId}`, error);
 }
-}, 5 * 60 * 1000);
+}, 5 * 60 * 1000)
 };
 await bot.sendMessage(chatId, '*Masukkan Email akun Cloudflare anda:*', { parse_mode: 'Markdown' });
-}
 } catch (error) {
 console.log('Callback Query error:', error);
+}
 }
 });
 
@@ -63,7 +69,7 @@ case 4:
 state.accountId = text;
 
 try {
-const response = await axios.get(`https://api.cloudflare.com/client/v4/zones${state.zoneId}/`, {
+const response = await axios.get(`https://api.cloudflare.com/client/v4/zones/${state.zoneId}`, {
 headers: {
 'X-Auth-Email': state.email,
 'X-Auth-Key': state.apiKey,
@@ -71,13 +77,19 @@ headers: {
 }
 });
 
-if (response.data.result.status === true) {
+if (response.data.success) {
 const domainName = response.data.result.name;
-} else {
-bot.sendMessage(chatId, '*Gagal menambah akun cloudflare*', {parse_mode:'Markdown'});
-delete userState[chatId]
-return;
+const workerName = generateRandomWorkerName();
+
+const workerResponse = await axios.put(
+`https://api.cloudflare.com/client/v4/accounts/${state.accountId}/workers/scripts/${workerName}`, workerContent,
+{
+headers: {
+'X-Auth-Email': state.email,
+'X-Auth-Key': state.apiKey,
+'Content-Type': 'application/javascript'
 }
+});
 
 const duplicateAccount = await CloudflareAccount.findOne({
 where: {
@@ -91,9 +103,9 @@ accountId: state.accountId
 });
 
 if (duplicateAccount) {
-bot.sendMessage(chatId, '*Data akun sudah ada!*', {parse_mode:'Markdown'}):
-return;
+await bot.sendMessage(chatId, '*Data akun sudah ada!*', { parse_mode: 'Markdown' });
 delete userState[chatId];
+return;
 } else {
 await CloudflareAccount.create({
 userChatId: chatId,
@@ -102,13 +114,26 @@ email: state.email,
 zoneId: state.zoneId,
 apiKey: state.apiKey,
 accountId: state.accountId,
-workerName: workerName,
+workerName: workerName
 });
-await bot.sendMessage(chatId, '*Akun berhasil ditambahkan!*', {parse_mode:'Markdown'});
+await bot.sendMessage(
+chatId,
+`*Akun berhasil ditambahkan!*\n\nWorker Name: ${workerName}\nRoute: ${routePattern}`,
+{ parse_mode: 'Markdown' }
+);
+}
+} else {
+await bot.sendMessage(chatId, '*Gagal menambah akun cloudflare*', { parse_mode: 'Markdown' });
+delete userState[chatId];
+return;
 }
 } catch (error) {
-bot.sendMessage(chatId, '*Terjadi kesalahan saat menambah akun*', {parse_mode:'Markdown'});
-console.log('Terjadi kesalahan saat menambah akun', error);
+console.error('Error adding Cloudflare account:', error);
+await bot.sendMessage(
+chatId,
+'*Terjadi kesalahan saat menambah akun*\n' + (error.response?.data?.errors?.[0]?.message || error.message),
+{ parse_mode: 'Markdown' }
+);
 }
 
 clearTimeout(state.timeout);
@@ -119,6 +144,6 @@ break;
 console.log('Terjadi kesalahan:', error);
 }
 });
-}
+};
 
-module.exports = addCloudflareAccount;)
+module.exports = addCloudflareAccountCallback;
