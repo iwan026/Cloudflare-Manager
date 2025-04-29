@@ -1,0 +1,13 @@
+version: '3.8'
+services:
+  cf-manager:
+    container_name: cf-manager
+    build: .
+    env_file: .env
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: ["npx", "nodemon", "xontol.js"]

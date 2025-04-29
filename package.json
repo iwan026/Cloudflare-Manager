@@ -1,0 +1,27 @@
+{
+  "name": "cf-manager",
+  "version": "1.0.0",
+  "description": "Cloudflare Manager",
+  "main": "xontol.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iwan026/Cloudflare-Manager.git"
+  },
+  "author": "Iwan Setiawan",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/iwan026/Cloudflare-Manager/issues"
+  },
+  "homepage": "https://github.com/iwan026/Cloudflare-Manager#readme",
+  "dependencies": {
+    "body-parser": "^2.2.0",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "node-telegram-bot-api": "^0.66.0",
+    "sequelize": "^6.37.7",
+    "sqlite3": "^5.1.7"
+  }
+}
