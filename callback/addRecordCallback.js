@@ -5,7 +5,7 @@ const userState = {};
 const addRecordCallback = (bot) => {
 bot.on('callback_query', async (callbackQuery) => {
 const { data, message } = callbackQuery;
-const chatId = message.message_id;
+const chatId = message.chat.id;
 
 if (data.startsWith('add_record_')) {
 const id = data.split('_')[2];
@@ -13,18 +13,18 @@ try {
 userState[chatId] = {
 step: 1,
 id: id,
-timeout = setTimeout(() => {
+timeout: setTimeout(() => {
 delete userState[chatId];
 bot.sendMessage(chatId, '⏳ Proses tambah akun Cloudflare dibatalkan (timeout)');
 mainMenu(bot, chatId);
-}, 5 * 60 * 1000);
+}, 5 * 60 * 1000)
 };
 
-await bot.sendMessage(chatId, '*Pilih tipe record:*' {
+await bot.sendMessage(chatId, '*Pilih tipe record:*', {
 parse_mode: 'Markdown',
 reply_markup: {
 inline_keyboard: [
-[{ text: 'A', callback_data: 'A' } { text: 'CNAME', callback_data: 'CNAME' }]
+[{ text: 'A', callback_data: 'A' }, { text: 'CNAME', callback_data: 'CNAME' }]
 ]
 }
 });
@@ -37,9 +37,9 @@ await bot.sendMessage(chatId, '❌ Gagal memulai proses. Coba lagi /start');
 
 bot.on('message', (msg) => {
 if (userState[msg.chat.id]) {
-addRecordHandler(bot, msg, userState, id);
+addRecordHandler(bot, msg, userState, userState[msg.chat.id].id); 
 }
-})
+});
 };
 
 module.exports = addRecordCallback;

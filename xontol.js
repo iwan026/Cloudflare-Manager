@@ -7,6 +7,7 @@ const { mainMenuCommand } = require('./handlers/mainMenu');
 const mainMenuCallback = require('./callback/mainMenuCallback');
 const addCloudflareAccountCallback = require('./callback/addCloudflareAccountCallback');
 const manageRecordCallback = require('./callback/manageRecordCallback');
+const addRecordCallback = require('./callback/addRecordCallback');
 
 const app = express();
 app.use(bodyParser.json());
@@ -70,6 +71,7 @@ mainMenuCommand(bot);
 mainMenuCallback(bot);
 addCloudflareAccountCallback(bot);
 manageRecordCallback(bot);
+addRecordCallback(bot);
 
 app.listen(port, () => {
 console.log(`Bot is running on port ${port} with webhook ${webhookUrl}`);
