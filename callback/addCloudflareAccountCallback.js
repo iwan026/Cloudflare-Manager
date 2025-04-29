@@ -8,7 +8,7 @@ bot.on('callback_query', async (callbackQuery) => {
 const { data, message } = callbackQuery;
 const chatId = message.chat.id;
 
-if (data === 'add_cloudflare') {
+if (data === 'add_cloudflare') {n
 try {
 // Init state
 userState[chatId] = { 
