@@ -9,6 +9,7 @@ const addCloudflareAccountCallback = require('./callback/addCloudflareAccountCal
 const manageRecordCallback = require('./callback/manageRecordCallback');
 const addRecordCallback = require('./callback/addRecordCallback');
 const deleteRecordCallback = require('./callback/deleteRecordCallback');
+const deleteCloudflareAccountCallback = require('./callback/deleteCloudflareAccountCallback');
 
 const app = express();
 app.use(bodyParser.json());
@@ -74,6 +75,7 @@ addCloudflareAccountCallback(bot);
 manageRecordCallback(bot);
 addRecordCallback(bot);
 deleteRecordCallback(bot);
+deleteCloudflareAccountCallback(bot);
 
 app.listen(port, () => {
 console.log(`Bot is running on port ${port} with webhook ${webhookUrl}`);
