@@ -1,5 +1,5 @@
 const { deleteRecordHandler, processDeleteRecord } = require('../handlers/deleteRecordHandler');
-const { mainMenu } = require('../handlers/mainMenu');
+const { mainMenu } = require('../handlers/mainMenu.js');
 const userState = {};
 
 const deleteRecordCallback = (bot) => {
@@ -10,21 +10,32 @@ const messageId = message.message_id;
 
 try {
 if (data.startsWith('delete_record_')) {
-const action = data.split('_')[2];
+const id = data.split('_')[2];
 
-if (action === 'cancel') {
-clearTimeout(userState[chatId]?.timeout);
+userState[chatId] = {
+step: 1,
+id: id,
+timeout: setTimeout(() => {
 delete userState[chatId];
+bot.sendMessage(chatId, '⏳ Proses hapus record dibatalkan (timeout)');
+mainMenu(bot, chatId);
+}, 5 * 60 * 1000)
+};
+
+await bot.sendMessage(chatId, '*Masukkan ID Record yang ingin dihapus:*', {parse_mode:'Markdown'});
+} else if (data === 'delete_record_confirm') {
+await processDeleteRecord(bot, chatId, state);
+clearTimeout(userState[chatId].timeout);
+delete userState[chatId];
+} else if (data === 'delete_record_cancel') {
+clearTimeout(userState[chatId].timeout);
 await bot.sendMessage(chatId, '❌ Proses penghapusan dibatalkan');
-await mainMenu(bot, chatId);
-} else if (action === 'confirm' && userState[chatId]) {
-await processDeleteRecord(bot, chatId, userState[chatId]);
-await mainMenu(bot, chatId);
-}
+delete userState[chatId];
+return;
 }
 } catch (error) {
-console.error('Callback error:', error);
-await bot.sendMessage(chatId, '❌ Proses gagal. Coba lagi /start');
+console.log('Callback error:', error);
+await bot.sendMessage(chatId, '❌ Terjadi kesalahan, silakan coba lagi nanti');
 }
 });
 

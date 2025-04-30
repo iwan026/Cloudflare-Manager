@@ -38,16 +38,16 @@ state.account = account;
 state.step = 2;
 
 await bot.sendMessage(chatId, `
-📋 Detail DNS Record:
-
+📋 *Detail DNS Record:*
+\`\`\`
 𝗜𝗗: ${record.id}
 𝗡𝗮𝗺𝗲: ${record.name}
 𝗧𝗶𝗽𝗲: ${record.type}
 𝗖𝗼𝗻𝘁𝗲𝗻𝘁: ${record.content}
 𝗧𝗧𝗟: ${record.ttl}
 𝗣𝗿𝗼𝘅𝗶𝗲𝗱: ${record.proxied ? '✅' : '❌'}
-
-Anda yakin ingin menghapus record ini?`, {
+\`\`\`
+*Anda yakin ingin menghapus record ini?*`, {
 parse_mode: 'Markdown',
 reply_markup: {
 inline_keyboard: [

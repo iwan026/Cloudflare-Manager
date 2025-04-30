@@ -68,7 +68,7 @@ callback_data: `list_record_${accountId}_${currentPage + 1}`
 // 5. Susun tombol
 const buttons = [
 ...(paginationButtons.length ? [paginationButtons] : []),
-[{ text: '➕ Add Record', callback_data: `add_record_${accountId}` }, { text: '❌ Delete Records', callback_data: `delete_record_${accountId}` }],
+[{ text: '➕ Add Record', callback_data: `add_record_${accountId}` }, { text: '❌ Delete Record', callback_data: `delete_record_${accountId}` }],
 [{ text: '🗑️ Delete Account', callback_data: `delete_account_${accountId}`}],
 [{ text: '🔙 Kembali', callback_data: 'back_to_main' }]
 ];
