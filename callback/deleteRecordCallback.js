@@ -24,14 +24,19 @@ mainMenu(bot, chatId);
 
 await bot.sendMessage(chatId, '*Masukkan ID Record yang ingin dihapus:*', {parse_mode:'Markdown'});
 } else if (data === 'delete_record_confirm') {
-await processDeleteRecord(bot, chatId, state);
+if (userState[chatId] && userState[chatId].step === 2) {
+await processDeleteRecord(bot, chatId, userState[chatId]);
 clearTimeout(userState[chatId].timeout);
 delete userState[chatId];
+} else {
+await bot.sendMessage(chatId, '❌ Tidak ada record yang dipilih untuk dihapus');
+}
 } else if (data === 'delete_record_cancel') {
+if (userState[chatId]) {
 clearTimeout(userState[chatId].timeout);
-await bot.sendMessage(chatId, '❌ Proses penghapusan dibatalkan');
 delete userState[chatId];
-return;
+}
+await bot.sendMessage(chatId, '❌ Proses penghapusan dibatalkan');
 }
 } catch (error) {
 console.log('Callback error:', error);
