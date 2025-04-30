@@ -6,11 +6,10 @@ const addRecordCallback = (bot) => {
 bot.on('callback_query', async (callbackQuery) => {
 const { data, message } = callbackQuery;
 const chatId = message.chat.id;
-const msgId = message.message_id;
+const messageId = message.message_id;
 
 try {
 if (data.startsWith('add_record_')) {
-// Handle awal memulai proses
 const id = data.split('_')[2];
 userState[chatId] = {
 step: 1,
@@ -42,7 +41,7 @@ userState[chatId].step = 2;
 
 await bot.editMessageText(
 `Tipe record dipilih: ${type}`,
-{ chat_id: chatId, message_id: msgId }
+{ chat_id: chatId, message_id: messageId }
 );
 
 await bot.sendMessage(chatId, '*Masukkan nama domain/subdomain:*', { 
@@ -58,7 +57,7 @@ userState[chatId].proxy = proxyMode;
 
 await bot.editMessageText(
 `Proxy mode dipilih: ${proxyMode === 'true' ? 'Proxied' : 'DNS Only'}`,
-{ chat_id: chatId, message_id: msgId }
+{ chat_id: chatId, message_id: messageId }
 );
 
 await processAddRecord(bot, chatId, userState[chatId], userState[chatId].id);

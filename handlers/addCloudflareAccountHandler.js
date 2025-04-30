@@ -1,5 +1,6 @@
 const axios = require('axios');
 const { User, CloudflareAccount } = require('../database/database');
+const workerContent = require('../utils/workerContent');
 
 // Generate random worker name
 const generateRandomWorkerName = () => {

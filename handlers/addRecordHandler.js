@@ -48,13 +48,14 @@ await bot.sendMessage(chatId, '❌ Akun Cloudflare tidak ditemukan');
 return;
 }
 
+const workerHostname = `${state.name}.${account.domainName}`;
 // 1. Tambahkan domain ke worker
 await bot.sendMessage(chatId, '⏳ Menambahkan domain ke worker...');
 const workerResponse = await axios.put(
 `https://api.cloudflare.com/client/v4/accounts/${account.accountId}/workers/domains`, 
 {
 environment: 'production',
-hostname: state.name,
+hostname: workerHostname,
 service: account.workerName,
 zone_id: account.zoneId
 },
